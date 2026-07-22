@@ -1,5 +1,6 @@
-# Première traversée — le modèle Vector exécuté, zéro dépendance.
-# python exemple.py
+"""Première traversée — le modèle Vector exécuté, zéro dépendance.
+python exemple.py
+"""
 from vector import Vector
 
 reg = {}
@@ -31,5 +32,16 @@ kage.links.append((Tk, moi))        # lien vers ce qu'il fut — rien d'effacé
 
 for (T, src, cible) in V("Sarah").links:
     print(f"{T.name} · {src.name} dit : Sarah -> {cible.name}")
-print(f"{len(reg)} vecteurs, dont {sum(1 for n in reg if n[:2]=='20')} temps-atomes.")
+
+# FB: comptage STRUCTUREL des temps-atomes — un temps est un Vector qui
+# apparaît en première position d'au moins un tuple de lien, jamais un
+# Vector reconnu par la forme de son nom (l'ancien `n[:2]=='20'` était
+# une convention de démo, pas un mécanisme du modèle : un mot pourrait
+# légitimement commencer par "20" et serait alors compté à tort).
+temps_atomes = set()
+for v in reg.values():
+    for lien in v.links:
+        temps_atomes.add(lien[0].name)      # premier élément de tout tuple = temps
+
+print(f"{len(reg)} vecteurs, dont {len(temps_atomes)} temps-atomes.")
 print("Aucun DELETE possible : le verbe n'existe pas.")

@@ -48,10 +48,18 @@ medium that reads it.
 
 ```
 python exemple.py
+python test_identite.py
 ```
 
 Genesis, weaving, two coexisting truths, an identity transformation
 (Hermes → Kage) with nothing erased. Sixteen vectors, zero dependencies.
+
+`test_identite.py` demonstrates *why* append-only isn't a preference:
+in a graph where identity is carried by name, deleting a node splits
+that name into two incompatible entities — one still reachable through
+existing links (history intact), one freshly recreated by any new
+lookup (empty). Not a loss of information — a structural corruption of
+identity itself. Run it, read the assertions, verify it yourself.
 
 ## What this is not
 
