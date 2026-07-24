@@ -16,14 +16,12 @@ def V(name):
 
 
 def construire_graphe():
-    """Deux vecteurs tiennent chacun un lien vers un troisième, avec
-    un historique réel (`seen`) sur ce dernier."""
-    T1 = V("2026-07-22_10h00")
-    V("JS").links.append((T1, V("FB"), V("Kage")))
-    T2 = V("2026-07-22_11h00")
-    V("Sarah").links.append((T2, V("JS"), V("Kage")))
-    V("Kage").seen.append(T1)
-    V("Kage").seen.append(T2)
+    """Deux vecteurs pointent vers un troisième, qui porte lui-même
+    une histoire : ses liens vers lui-même à travers le temps."""
+    V("JS").links.append([V("Kage"), V("2026-07-22_10h00"), V("FB")])
+    V("Sarah").links.append([V("Kage"), V("2026-07-22_11h00"), V("JS")])
+    V("Kage").links.append([V("Kage"), V("2026-07-22_10h00")])
+    V("Kage").links.append([V("Kage"), V("2026-07-22_11h00")])
 
 
 def simuler_suppression(nom: str):
@@ -33,10 +31,15 @@ def simuler_suppression(nom: str):
     return reg.pop(nom)
 
 
+def histoire(v):
+    """Les instants où ce vecteur existe : ses liens vers lui-même."""
+    return [q.name for l in v.links if l[0] is v for q in l[1:]]
+
+
 def demontrer():
     construire_graphe()
     print("=== Avant suppression ===")
-    print(f"  Kage.seen : {[t.name for t in V('Kage').seen]}  (historique réel)")
+    print(f"  Kage existe à : {histoire(V('Kage'))}  (histoire réelle)")
 
     ancien_kage = simuler_suppression("Kage")
 
@@ -46,15 +49,19 @@ def demontrer():
     meme_objet = ancien_kage is nouveau_kage
     print(f"  Nouvel objet 'Kage' recréé, id={id(nouveau_kage)}")
     print(f"  Est-ce le même que celui référencé par JS et Sarah ? {meme_objet}")
-    print(f"  Historique du nouveau 'Kage' : {nouveau_kage.seen}  (vide !)")
+    print(f"  Histoire du nouveau 'Kage' : {histoire(nouveau_kage)}  (vide !)")
 
     assert not meme_objet, "la suppression aurait dû casser l'identité"
-    assert nouveau_kage.seen == [], "le nouveau Kage ne doit avoir aucun passé"
-    assert ancien_kage.seen != [], "l'ancien Kage garde son passé, inaccessible"
+    assert histoire(nouveau_kage) == [], "le nouveau Kage ne doit avoir aucun passé"
+    assert histoire(ancien_kage) != [], "l'ancien Kage garde son passé, inaccessible"
+
+    cible_js = V("JS").links[0][0]
+    assert cible_js is ancien_kage, "JS pointe encore vers l'ancien Kage"
+    assert cible_js is not nouveau_kage, "et pas vers le nouveau"
 
     print("\n=== Verdict ===")
     print("  Le même nom 'Kage' désigne maintenant DEUX entités distinctes :")
-    print("  - celle que suivent les liens existants de JS et Sarah (historique intact)")
+    print("  - celle que suivent les liens existants de JS et Sarah (histoire intacte)")
     print("  - celle que retrouve toute NOUVELLE recherche par ce nom (vide)")
     print()
     print("  Ce n'est pas une perte d'information. C'est une incohérence")
